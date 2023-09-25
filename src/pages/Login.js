@@ -2,15 +2,11 @@ import { useState } from 'react';
 import { StyleSheet, Text, View, Button, Pressable } from 'react-native';
 import MaiaLogo from '../components/MaiaLogo';
 import TextInputWithLabel from '../components/TextInputWithLabel';
+import BoxContainer from '../components/BoxContainer';
 
 const Login = () => {
   const [userRA, setUserRA] = useState("");
   const [userPassword, setUserPassword] = useState("");
-
-  function handleGoRegister() {
-    // Function to redirect user to register page
-    console.log("Redirecionar para tela de cadastro")
-  }
 
   function handleSubmitLogin() {
     // Function to send the login data to back-end
@@ -18,9 +14,12 @@ const Login = () => {
   }
 
   return (
-    <View style={styles.container}>
+    <BoxContainer>
       <MaiaLogo />
-      <Text style={styles.informationText}>Bem-Vindo Aluno, Informe seu acesso.</Text>
+      <View>
+        <Text style={styles.informationText}>Acesse a conta</Text>
+        <Text style={styles.descriptionText}>Entre na sua conta para poder ter acesso aos equipamentos do maia.</Text>
+      </View>    
       <View style={styles.loginInputsContainer}>
         <TextInputWithLabel label="RA" value={userRA} 
                             onChangeText={setUserRA} 
@@ -32,22 +31,12 @@ const Login = () => {
                             secureTextEntry={true}
         />
       </View>
-      <View>
-        <Button title="ENTRAR" color="#005C56" onPress={handleSubmitLogin} />
-        <Pressable onPress={handleGoRegister}>
-          <Text style={styles.wantRegisterText}>Quero me cadastrar!</Text>
-        </Pressable>
-      </View>
-    </View>
+      <Button title="ENTRAR" color="#005C56" onPress={handleSubmitLogin} />
+    </BoxContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'flex-start',
-    gap: 18
-  },
   loginInputsContainer: {
     gap: 16,
     marginVertical: 12
@@ -55,6 +44,11 @@ const styles = StyleSheet.create({
   informationText: {
     fontSize: 32,
     fontWeight: '500',
+    color: '#005C56'
+  },
+  descriptionText: {
+    fontSize: 18,
+    fontWeight: '300',
     color: '#005C56'
   },
   wantRegisterText: {

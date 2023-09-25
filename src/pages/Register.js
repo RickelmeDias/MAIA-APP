@@ -2,16 +2,12 @@ import { useState } from 'react';
 import { StyleSheet, Text, View, Button, Pressable } from 'react-native';
 import MaiaLogo from '../components/MaiaLogo';
 import TextInputWithLabel from '../components/TextInputWithLabel';
+import BoxContainer from '../components/BoxContainer';
 
 const Register = () => {
   const [userTeam, setUserTeam] = useState("");
   const [userRA, setUserRA] = useState("");
   const [userPassword, setUserPassword] = useState("");
-
-  function handleGoLogin() {
-    // Function to redirect user to lgoin page
-    console.log("Redirecionar para tela login");
-  }
 
   function handleSubmitRegister() {
     // Function to send the register data to backend
@@ -19,9 +15,12 @@ const Register = () => {
   }
 
   return (
-    <View style={styles.container}>
+    <BoxContainer>
       <MaiaLogo />
-      <Text style={styles.informationText}>Partiu se cadastrar? Preencha abaixo:</Text>
+      <View>
+        <Text style={styles.informationText}>Registre-se!</Text>
+        <Text style={styles.descriptionText}>Faça o cadastro no aplicativo para começar a usar.</Text>
+      </View>
       <View style={styles.registerInputsContainer}>
         <View style={styles.onSideTwoInputs}>
           <View style={{flex:1}}>
@@ -41,22 +40,12 @@ const Register = () => {
                             secureTextEntry={true}
         />
       </View>
-      <View>
-        <Button title="FINALIZAR CADASTRO" color="#005C56" onPress={handleSubmitRegister}/>
-        <Pressable onPress={handleGoLogin}>
-          <Text style={styles.backToLoginText}>Voltar para tela de login</Text>
-        </Pressable>
-      </View>
-    </View>
+      <Button title="FINALIZAR CADASTRO" color="#005C56" onPress={handleSubmitRegister}/>
+    </BoxContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'flex-start',
-    gap: 18
-  },
   registerInputsContainer: {
     gap: 16,
     marginVertical: 12
@@ -68,6 +57,11 @@ const styles = StyleSheet.create({
   informationText: {
     fontSize: 32,
     fontWeight: '500',
+    color: '#005C56'
+  },
+  descriptionText: {
+    fontSize: 18,
+    fontWeight: '300',
     color: '#005C56'
   },
   backToLoginText: {

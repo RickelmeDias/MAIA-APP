@@ -5,7 +5,6 @@ const styles = StyleSheet.create({
     container: {
         alignItems: 'center',
         gap: 8,
-        marginVertical: 18, 
     },
     textTitle: {
         fontSize: 16,
