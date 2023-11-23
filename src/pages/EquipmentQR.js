@@ -1,11 +1,16 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { StyleSheet, Button, View, Modal, Text } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { Image } from 'expo-image';
 import BoxContainer from '../components/BoxContainer';
 import Scanner from '../components/Scanner';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+import { BACKEND_HOST } from '../core/environment/host';
 
 const blurhash = '|rF?hV%2WCj[ayj[a|j[az_NaeWBj@ayfRayfQfQM{M|azj[azf6fQfQfQIpWXofj[ayj[j[fQayWCoeoeaya}j[ayfQa{oLj?j[WVj[ayayj[fQoff7azayj[ayj[j[ayofayayayj[fQj[ayayj[ayfjj[j[ayjuayj[';
+
+const EQUIPMENT_API = `http://${BACKEND_HOST}:3000/equipment`;
 
 const EquipmentQR = () => {
     const [equipment, setEquipment] = useState(null);
@@ -18,22 +23,107 @@ const EquipmentQR = () => {
         setType(type);
         setData(data);
         setModalVisible(false);
-
-        if (data=='ebf496d3') {
-            setEquipment({
-                name: 'Multimetro Digital DT4300A',
-                imgsrc: 'https://github.com/RickelmeDias/MAIA-APP/assets/43411893/b19f6ac2-a6cf-4628-aa0b-d35c5525fac2'
-            })
-        }
     };
     
+    useEffect(() => {
+        const fetchEquipmentData = async () => {
+            let userToken;
+            try {
+                userToken = await AsyncStorage.getItem('access_token');
+                const response = await fetch(`${EQUIPMENT_API}/${data}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${userToken}`,
+                    },
+                });
+                if (response.ok) {
+                    const equipmentData = await response.json();
+                    if (equipmentData.qrCode) {
+                        setEquipment(equipmentData);
+                    } else {
+                        setEquipment(null);
+                    }
+                } else {
+                    setEquipment(null);
+                }
+            } catch (error) {
+                console.error('Error fetching equipment data:', error);
+                setEquipment(null);
+            }
+        };
+        if (data != null && data != undefined) {
+            fetchEquipmentData();
+        }
+    }, [data]);
+    
     const handleGetEquipment = () => {
-        console.log("Pegar Equipamento API");
+        if (data != null && data != undefined) {
+            reserveEquipment();
+        }
     }
 
+    const reserveEquipment = async () => {
+        let userToken;
+        try {
+            userToken = await AsyncStorage.getItem('access_token');
+            const response = await fetch(`${EQUIPMENT_API}/${data}/reserve`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${userToken}`,
+                },
+            });
+            if (response.status===400) {
+                console.log("Produto já está reservado.");
+            }else{
+                if (response.ok) {
+                    const equipmentData = await response.json();
+                    if (equipmentData.reservedByUser!=null) {
+                        setEquipment(equipmentData);
+                    }
+                    console.log("Produto reservado com sucesso para você!");
+                }
+            }
+        } catch (error) {
+            console.error('Erro ao reservar equipamento:', error);
+        }
+    };    
+
+    
     const handleReturnEquipment = () => {
-        console.log("Devolver Equipamento API");
+        if (data != null && data != undefined) {
+            returnEquipment();
+        }
     }
+
+    const returnEquipment = async () => {
+        let userToken;
+        try {
+            userToken = await AsyncStorage.getItem('access_token');
+            const response = await fetch(`${EQUIPMENT_API}/${data}/return`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${userToken}`,
+                },
+            });
+            if (response.status===400) {
+                console.log("Produto não possui resevas ou você não é o dono da reserva.");
+            }else{
+                if (response.ok) {
+                    const equipmentData = await response.json();
+                    if (equipmentData.reservedByUser==null) {
+                        setEquipment(equipmentData);
+                    }
+                    console.log("Requisicao de devolucao enviada!");
+                }
+            }
+        } catch (error) {
+            console.error('Erro ao reservar equipamento:', error);
+        }
+    };    
+
 
     return (
         <BoxContainer>
@@ -59,6 +149,7 @@ const EquipmentQR = () => {
                 ):(
                     <View style={styles.equipmentContainer}>
                         <Text style={styles.equipmentNameText}>{equipment.name}</Text>
+                        <Text style={styles.equipmentInfo}>{equipment.reservedByUser == null ? 'Equipamento não reservado' : `Reservado por ${equipment.reservedByUser.name} - RA: ${equipment.reservedByUser.ra}`}</Text>
                         <Image
                             style={styles.image}
                             source={{uri: equipment.imgsrc}}
@@ -92,10 +183,14 @@ const styles = StyleSheet.create({
         height: '60%',
         backgroundColor: '#0553',
     },
+    equipmentInfo: {
+        fontSize: 14,
+        color: '#005C56',
+    },
     informationText: {
         fontSize: 32,
         fontWeight: '500',
-        color: '#005C56'
+        color: '#005C56',
     },
     descriptionText: {
         fontSize: 18,

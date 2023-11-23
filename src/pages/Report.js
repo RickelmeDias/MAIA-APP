@@ -1,155 +1,48 @@
-import { useState } from 'react';
-import { StyleSheet, Text, View, Button, Pressable } from 'react-native';
+import { useEffect, useState } from 'react';
+import { StyleSheet } from 'react-native';
 import { FlashList } from "@shopify/flash-list";
 import BoxContainer from '../components/BoxContainer';
 import ItemReportList from '../components/ItemReportList';
-import TextInputWithLabel from '../components/TextInputWithLabel';
-import DateTimePicker from '@react-native-community/datetimepicker';
-import Icon from "react-native-vector-icons/FontAwesome";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Report = () => {
-  const [data, setData] = useState([
-    {
-      equipment: {
-        name: 'Multimetro Digital DT4300A',
-        imgsrc: 'https://github.com/RickelmeDias/MAIA-APP/assets/43411893/b19f6ac2-a6cf-4628-aa0b-d35c5525fac2'
-      },
-      reservedByUser: {
-        name: 'Jose Afonso',
-        team: 'MAIA',
-        ra: '210650'
-      },
-      reservedDate: '1579335602',
-      returnedDate: '1695667202'
-    },
-    {
-      equipment: {
-        name: 'Multimetro Digital DT4300A',
-        imgsrc: 'https://github.com/RickelmeDias/MAIA-APP/assets/43411893/b19f6ac2-a6cf-4628-aa0b-d35c5525fac2'
-      },
-      reservedByUser: {
-        name: 'Jose Afonso',
-        team: 'MAIA',
-        ra: '210650'
-      },
-      reservedDate: '1579335602',
-      returnedDate: '1695667202'
-    },
-    {
-      equipment: {
-        name: 'Multimetro Digital DT4300A',
-        imgsrc: 'https://github.com/RickelmeDias/MAIA-APP/assets/43411893/b19f6ac2-a6cf-4628-aa0b-d35c5525fac2'
-      },
-      reservedByUser: {
-        name: 'Jose Afonso',
-        team: 'MAIA',
-        ra: '210650'
-      },
-      reservedDate: '1579335602',
-      returnedDate: '1695667202'
-    },
-    {
-      equipment: {
-        name: 'Multimetro Digital DT4300A',
-        imgsrc: 'https://github.com/RickelmeDias/MAIA-APP/assets/43411893/b19f6ac2-a6cf-4628-aa0b-d35c5525fac2'
-      },
-      reservedByUser: {
-        name: 'Jose Afonso',
-        team: 'MAIA',
-        ra: '210650'
-      },
-      reservedDate: '1579335602',
-      returnedDate: '1695667202'
-    },
-    {
-      equipment: {
-        name: 'Multimetro Digital DT4300A',
-        imgsrc: 'https://github.com/RickelmeDias/MAIA-APP/assets/43411893/b19f6ac2-a6cf-4628-aa0b-d35c5525fac2'
-      },
-      reservedByUser: {
-        name: 'Jose Afonso',
-        team: 'MAIA',
-        ra: '210650'
-      },
-      reservedDate: '1579335602',
-      returnedDate: '1695667202'
-    },
-  ]);
+  const [data, setData] = useState([]);
+  const [page, setPage] = useState(1);
 
-  const [startDate, setStartDate] = useState(new Date());
-  const [endtDate, setEndDate] = useState(new Date());
-  const [mode, setMode] = useState('');
-  const [show, setShow] = useState(false);
+  const getLogs = async () => {
+    userToken = await AsyncStorage.getItem('access_token');
+    const currentDate = new Date();
+    const endOfDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate(), 23, 59, 59, 999);
+    const endOfDayUnixTimestamp = Math.floor(endOfDay.getTime() / 1000);
+    
+    const response = await fetch(`http://192.168.15.57:3000/logs/equipment/?page=${page}&pageSize=10&from=${0}&to=${endOfDayUnixTimestamp}&equipmentName&userRa`, {
+      method: 'GET',      
+      headers:{
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + userToken
+      }
+    });
 
-  const onChange = (event, selectedDate) => {
-    const currentDate = selectedDate;
-    setShow(false);
-    switch (mode) {
-      case 'start':
-        setStartDate(currentDate);
-        break;
-      case 'end':
-        setEndDate(currentDate);
-        break;    
-      default:
-        break;
+    if (response.ok) {
+      const newData = await response.json();
+      setData((prevData) => {
+        return [...prevData, ...newData[0]];
+      });
     }
-  };
-
-  const handleMode = (mode) => {
-    setMode(mode);
-    setShow(true);
   }
 
-  const [keyword, setKeyword] = useState("");
-  const [userRa, setUserRa] = useState("");
+  useEffect(() => {
+    getLogs();
+  }, [page])
 
   return (
     <BoxContainer>
-      <View style={styles.inputsContainer}>
-        <TextInputWithLabel label="EQUIPAMENTO" value={keyword} 
-                              onChangeText={setKeyword} 
-                              placeholder="DIGITE PALAVRAS CHAVE DO EQUIPAMENTO"
-                              
-        />
-        <TextInputWithLabel label="RA" value={userRa} 
-                              onChangeText={setUserRa} 
-                              placeholder="DIGITE O RA DE ALGUM ALUNO"
-                              
-        />
-        <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between', flexWrap: 'wrap'}}>
-          <Pressable onPress={()=>handleMode('start')} style={{alignItems: 'flex-start'}}>
-            <Text style={styles.inputLabelText}>DATA INICIAL</Text>
-            <Text style={styles.inputLabelText}>DE RETIRADA</Text>
-            <View style={styles.datePickerPressableCustom}>
-              <Icon name="calendar" size={24} color='#005C56'/>
-              <Text style={styles.dateCustomText} >{startDate.toLocaleDateString()}</Text>
-            </View>
-          </Pressable>
-          <Pressable onPress={()=>handleMode('end')} style={{alignItems: 'flex-start'}}> 
-            <Text style={styles.inputLabelText}>DATA FINAL</Text>
-            <Text style={styles.inputLabelText}>DE RETIRADA</Text>
-            <View style={styles.datePickerPressableCustom}>
-              <Icon name="calendar" size={24} color='#005C56'/>
-              <Text style={styles.dateCustomText} >{endtDate.toLocaleDateString()}</Text>
-            </View>
-          </Pressable>
-        </View>
-      {show && (
-        <DateTimePicker
-          testID="dateTimePicker"
-          value={mode=='start'?startDate:endtDate}
-          mode='date'
-          is24Hour={true}
-          onChange={onChange}
-        />
-      )}
-      <Button title="BUSCAR" color="#005C56" />
-      </View>
-      <FlashList
+      <FlashList 
         data={data}
-        renderItem={({ item }) => <ItemReportList item={item}/>}
+        renderItem={({ item, index }) => <ItemReportList item={item} />}
         estimatedItemSize={200}
+        onEndReachedThreshold={0.5}
+        onEndReached={()=>setPage(page+1)}
       />
     </BoxContainer>
   );

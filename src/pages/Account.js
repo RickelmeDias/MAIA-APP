@@ -1,25 +1,37 @@
-import { useState } from 'react';
-import { StyleSheet, Text, View, Button, Pressable } from 'react-native';
+import React, { useState, useContext, useEffect } from 'react';
+import { StyleSheet, Text, View, Pressable } from 'react-native';
 import BoxContainer from '../components/BoxContainer';
+import AuthContext from '../core/context/authContext';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Account = () => {
-  const [isSignedIn, setIsSignedIn] = useState({
-    name: 'Rickelme Dias',
-    ra: '001122',
-  });
+  const [user, setUser] = useState(null)
+  const { signOut } = useContext(AuthContext);
 
-  function handleLogout() {
-    // Function to send the Home data to backend
-    console.log("logout");
+  useEffect(() => {
+    async function getUser() {
+      try {
+        const userStorage = await AsyncStorage.getItem('user');
+        const user = JSON.parse(userStorage);
+        setUser(user);
+      } catch (error) {
+        console.error('Error to get user accont:', error);
+      }
+    }
+    getUser();
+  }, []);
+
+  const handleSignOut = () => {
+    signOut();
   }
-
+  
   return (
     <BoxContainer>
         <View>
           <Text style={styles.informationText}>Usuario Logado </Text>
-          <Text style={styles.userInformationText}>{isSignedIn.name}  -  {isSignedIn.ra}</Text>
+          <Text style={styles.userInformationText}>{user ? user.name : ''}  -  {user ? user.ra : ''}</Text>
         </View>
-        <Pressable onPress={handleLogout}>
+        <Pressable onPress={handleSignOut}>
           <Text style={styles.wantRegisterText}>Sair da Conta</Text>
         </Pressable>
     </BoxContainer>
@@ -51,3 +63,5 @@ const styles = StyleSheet.create({
 });
 
 export default Account;
+
+

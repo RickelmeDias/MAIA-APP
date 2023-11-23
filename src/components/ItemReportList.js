@@ -1,24 +1,21 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { Image } from 'expo-image';
 
-const blurhash = '|rF?hV%2WCj[ayj[a|j[az_NaeWBj@ayfRayfQfQM{M|azj[azf6fQfQfQIpWXofj[ayj[j[fQayWCoeoeaya}j[ayfQa{oLj?j[WVj[ayayj[fQoff7azayj[ayj[j[ayofayayayj[fQj[ayayj[ayfjj[j[ayjuayj[';
+const deParaAcoes =  {
+    "CREATE": 'criação',
+    "RESERVE": 'reserva',
+    "RETURN": 'devolução',
+    "DEACTIVATE": 'desativação',
+}  
 
 const ItemReportList = (props) => {
-    console.log(props)
   return (
     <View style={styles.container}>
-        <Image
-            style={styles.image}
-            source={{uri: props.item.equipment.imgsrc}}
-            placeholder={blurhash}
-            contentFit="cover"
-            transition={1000}
-        />
         <View>
-            <Text style={styles.textTitle}>{props.item.equipment.name}</Text>
-            <Text style={styles.textTitle}>{props.item.reservedByUser.name} ({props.item.reservedByUser.ra})</Text>
-            <Text style={styles.textTitle}>{new Date(props.item.reservedDate*1000).toLocaleDateString()} - {new Date(props.item.returnedDate*1000).toLocaleDateString()}</Text>
+            <Text style={styles.textTitle}>Equipamento: {props.item.equipmentName}</Text>
+            <Text style={styles.textTitle}>Ação: {props.item.action ? deParaAcoes[props.item.action.toUpperCase()] : ''} de equipamento</Text>
+            <Text style={styles.textTitle}>Responsavel pela ação: {props.item.actionByUserName} | {props.item.actionByUserRa}</Text>
+            <Text style={styles.textTitle}>Data da Acao: {new Date(props.item.createdAt).toLocaleDateString()}</Text>
         </View>
     </View>
   );

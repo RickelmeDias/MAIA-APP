@@ -1,18 +1,46 @@
 import { useState } from 'react';
-import { StyleSheet, Text, View, Button, Pressable } from 'react-native';
+import { StyleSheet, Text, View, Button } from 'react-native';
 import MaiaLogo from '../components/MaiaLogo';
 import TextInputWithLabel from '../components/TextInputWithLabel';
 import BoxContainer from '../components/BoxContainer';
+import { useNavigation } from '@react-navigation/native';
+import { BACKEND_HOST } from '../core/environment/host';
+
+const REGISTER = `http://${BACKEND_HOST}:3000/user`;
 
 const Register = () => {
+  const navigation = new useNavigation();
+
   const [userTeam, setUserTeam] = useState("");
   const [userRA, setUserRA] = useState("");
+  const [userName, setUserName] = useState("");
   const [userPassword, setUserPassword] = useState("");
-
-  function handleSubmitRegister() {
-    // Function to send the register data to backend
-    console.log({ userTeam, userRA, userPassword });
-  }
+  
+  const handleSubmitCreateUser = async () => {
+    try {
+      const response = await fetch(REGISTER, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ra: userRA,
+          password: userPassword,
+          name: userName,
+          team: userTeam,
+        }),
+      });
+      if (response.status==201) {
+        navigation.navigate('Login');
+      }
+      if (!response.ok) {
+        throw new Error('Failed to create user');
+      }
+      // const data = await response.json();
+    } catch (error) {
+      console.error('Error creating user:', error);
+    }
+  };
 
   return (
     <BoxContainer>
@@ -29,6 +57,11 @@ const Register = () => {
                                 placeholder="EQUIPE" />
           </View>
           <View style={{flex:1}}>
+            <TextInputWithLabel label="NOME" value={userName} 
+                                onChangeText={setUserName} 
+                                placeholder="NOME" />
+          </View>
+          <View style={{flex:1}}>
             <TextInputWithLabel label="RA" value={userRA} 
                                 onChangeText={setUserRA} 
                                 placeholder="RA" />
@@ -40,7 +73,7 @@ const Register = () => {
                             secureTextEntry={true}
         />
       </View>
-      <Button title="FINALIZAR CADASTRO" color="#005C56" onPress={handleSubmitRegister}/>
+      <Button title="FINALIZAR CADASTRO" color="#005C56" onPress={handleSubmitCreateUser}/>
     </BoxContainer>
   );
 }

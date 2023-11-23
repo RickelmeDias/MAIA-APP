@@ -1,7 +1,5 @@
-import { useState } from 'react';
 import { StyleSheet, Text, View, Button, Pressable, ScrollView } from 'react-native';
 import MaiaLogo from '../components/MaiaLogo';
-import TextInputWithLabel from '../components/TextInputWithLabel';
 import BoxContainer from '../components/BoxContainer';
 
 const Home = () => {

@@ -1,16 +1,20 @@
-import { useState } from 'react';
-import { StyleSheet, Text, View, Button, Pressable } from 'react-native';
+import React, { useState, useContext } from 'react';
+import { StyleSheet, Text, View, Button } from 'react-native';
 import MaiaLogo from '../components/MaiaLogo';
 import TextInputWithLabel from '../components/TextInputWithLabel';
 import BoxContainer from '../components/BoxContainer';
+import AuthContext from '../core/context/authContext';
 
 const Login = () => {
+  const { signIn } = useContext(AuthContext);
+
   const [userRA, setUserRA] = useState("");
   const [userPassword, setUserPassword] = useState("");
 
-  function handleSubmitLogin() {
-    // Function to send the login data to back-end
-    console.log({ userRA, userPassword })
+  const handleLogin = () => {
+    if (userRA != undefined && userRA != null && userPassword != undefined && userPassword != null) {
+      signIn({userRA, userPassword});
+    }
   }
 
   return (
@@ -31,7 +35,7 @@ const Login = () => {
                             secureTextEntry={true}
         />
       </View>
-      <Button title="ENTRAR" color="#005C56" onPress={handleSubmitLogin} />
+      <Button title="ENTRAR" color="#005C56" onPress={handleLogin} />
     </BoxContainer>
   );
 }
